@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "638631199741",
+    "project_id": "innovatevr1",
+    "storage_bucket": "innovatevr1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638631199741:android:4a316820075edd1ed40f94",
+        "android_client_info": {
+          "package_name": "com.example.innovatevr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBogW0rQKv2kU1cokHB5H2kJH4_BCIY01E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
