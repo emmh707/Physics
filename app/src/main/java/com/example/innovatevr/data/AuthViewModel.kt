@@ -42,11 +42,11 @@ class AuthViewModel : ViewModel() {
                 val userId = mAuth.currentUser?.uid ?: return@addOnSuccessListener
 
                 val userData = UserModel(
-                    fullname = fullname,
+                    fullName = fullname,
                     email = email,
                     password = password,
-                    confirmpassword = confirmpassword,
-                    userId = userId
+                    confirmPassword = confirmpassword,
+                    userId = userId,
                 )
 
                 saveUserToDatabase(userId, userData, navController, context)

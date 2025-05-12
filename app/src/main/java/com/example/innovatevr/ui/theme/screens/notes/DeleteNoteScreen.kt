@@ -1,4 +1,4 @@
-package com.example.innovatevr.ui.theme.screens.notes
+package com.example.innovatevr.ui.theme.screens
 
 import android.content.Context
 import androidx.compose.material3.*
@@ -11,18 +11,24 @@ import com.example.innovatevr.data.NoteViewModel
 
 @Composable
 fun DeleteNoteScreen(
-    context: Context,
     noteId: String,
     navController: NavController,
     noteViewModel: NoteViewModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    context: Context
 ) {
+    val context = LocalContext.current
+
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                noteViewModel.deleteNote(context, noteId, navController)
+                noteViewModel.deleteNote(
+                    context, noteId,
+                    navController = TODO()
+                )
                 onDismiss()
+                navController.popBackStack()
             }) {
                 Text("Yes")
             }
@@ -40,15 +46,16 @@ fun DeleteNoteScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DeleteNoteScreenPreview() {
-    val context = LocalContext.current
     val navController = rememberNavController()
     val noteViewModel = NoteViewModel()
 
-    DeleteNoteScreen(
-        context = context,
-        noteId = "sampleNoteId",
-        navController = navController,
-        noteViewModel = noteViewModel,
-        onDismiss = {}
-    )
+    MaterialTheme {
+        DeleteNoteScreen(
+            noteId = "sampleNoteId",
+            navController = navController,
+            noteViewModel = noteViewModel,
+            onDismiss = {},
+            context = LocalContext.current
+        )
+    }
 }

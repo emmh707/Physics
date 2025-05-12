@@ -1,5 +1,6 @@
 package com.example.innovatevr.ui.theme.screens.notes
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.innovatevr.data.NoteViewModel
+
 
 @Composable
 fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
@@ -37,6 +39,8 @@ fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
             value = content,
             onValueChange = { content = it },
@@ -46,22 +50,23 @@ fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
                 .height(150.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
                 if (title.isNotBlank() && content.isNotBlank()) {
                     noteViewModel.addNote(context, title, content, navController)
                     navController.popBackStack()
+                } else {
+                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save")
+            Text("Save Note")
         }
     }
 }
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AddNoteScreenPreview() {

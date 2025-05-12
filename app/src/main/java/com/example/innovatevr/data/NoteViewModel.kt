@@ -24,15 +24,15 @@ open class NoteViewModel : ViewModel() {
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val noteId = database.push().key ?: return@launch
-            val note = NoteModel(noteId, title, content)
+            val note = NoteModel(noteId = noteId, title = title, content = content)
 
             database.child(noteId).setValue(note)
                 .addOnSuccessListener {
                     viewModelScope.launch(Dispatchers.Main) {
                         Toast.makeText(context, "Note saved successfully", Toast.LENGTH_SHORT).show()
-                        // navController.navigate(ROUTE_VIEW_NOTES) if needed
                     }
-                }.addOnFailureListener {
+                }
+                .addOnFailureListener {
                     viewModelScope.launch(Dispatchers.Main) {
                         Toast.makeText(context, "Failed to save note", Toast.LENGTH_SHORT).show()
                     }
@@ -44,16 +44,18 @@ open class NoteViewModel : ViewModel() {
         note: MutableState<NoteModel>,
         notes: SnapshotStateList<NoteModel>,
         context: Context
-    ): SnapshotStateList<NoteModel> {
+    ) {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                notes.clear()
-                for (snap in snapshot.children) {
-                    val item = snap.getValue(NoteModel::class.java)
-                    item?.let { notes.add(it) }
-                }
-                if (notes.isNotEmpty()) {
-                    note.value = notes.first()
+                viewModelScope.launch(Dispatchers.Main) {
+                    notes.clear()
+                    for (snap in snapshot.children) {
+                        val item = snap.getValue(NoteModel::class.java)
+                        item?.let { notes.add(it) }
+                    }
+                    if (notes.isNotEmpty()) {
+                        note.value = notes.first()
+                    }
                 }
             }
 
@@ -61,7 +63,6 @@ open class NoteViewModel : ViewModel() {
                 Toast.makeText(context, "Failed to fetch notes", Toast.LENGTH_SHORT).show()
             }
         })
-        return notes
     }
 
     fun updateNote(
@@ -72,12 +73,11 @@ open class NoteViewModel : ViewModel() {
         noteId: String
     ) {
         val ref = database.child(noteId)
-        val updatedNote = NoteModel(noteId, title, content)
+        val updatedNote = NoteModel(noteId = noteId, title = title, content = content)
 
         ref.setValue(updatedNote).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(context, "Note updated", Toast.LENGTH_SHORT).show()
-                // navController.navigate(ROUTE_VIEW_NOTES)
             } else {
                 Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
             }

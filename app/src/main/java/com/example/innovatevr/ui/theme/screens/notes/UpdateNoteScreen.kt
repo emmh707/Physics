@@ -1,5 +1,6 @@
 package com.example.innovatevr.ui.theme.screens.notes
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,6 +44,8 @@ fun UpdateNoteScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
             value = content,
             onValueChange = { content = it },
@@ -52,11 +55,16 @@ fun UpdateNoteScreen(
                 .height(150.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-                noteViewModel.updateNote(context, navController, title, content, noteId)
+                if (title.isNotBlank() && content.isNotBlank()) {
+                    noteViewModel.updateNote(context, navController, title, content, noteId)
+                    navController.popBackStack()
+                } else {
+                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -69,13 +77,13 @@ fun UpdateNoteScreen(
 @Composable
 fun UpdateNoteScreenPreview() {
     val navController = rememberNavController()
-    val noteViewModel = NoteViewModel()
+    val fakeNoteViewModel = NoteViewModel()
 
     UpdateNoteScreen(
         navController = navController,
-        noteId = "sampleNoteId",
-        oldTitle = "Sample Title",
-        oldContent = "Sample content of the note.",
-        noteViewModel = noteViewModel
+        noteId = "previewNoteId",
+        oldTitle = "Magnetic Fields",
+        oldContent = "This note explains how electromagnetic induction works...",
+        noteViewModel = fakeNoteViewModel
     )
 }
