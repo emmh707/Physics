@@ -1,5 +1,6 @@
 package com.example.innovatevr.ui.theme.screens.notes
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -19,13 +20,13 @@ import com.example.innovatevr.data.NoteViewModel
 fun UpdateNoteScreen(
     navController: NavController,
     noteId: String,
-    oldTitle: String,
-    oldContent: String,
+    encodedTitle: String,
+    encodedContent: String,
     noteViewModel: NoteViewModel
 ) {
     val context = LocalContext.current
-    var title by remember { mutableStateOf(oldTitle) }
-    var content by remember { mutableStateOf(oldContent) }
+    var title by remember { mutableStateOf(Uri.decode(encodedTitle)) }
+    var content by remember { mutableStateOf(Uri.decode(encodedContent)) }
 
     Column(
         modifier = Modifier
@@ -60,8 +61,14 @@ fun UpdateNoteScreen(
         Button(
             onClick = {
                 if (title.isNotBlank() && content.isNotBlank()) {
-                    noteViewModel.updateNote(context, navController, title, content, noteId)
-                    navController.popBackStack()
+                    noteViewModel.updateNote(
+                        context = context,
+                        title = title,
+                        content = content,
+                        noteId = noteId
+                    ) {
+                        navController.popBackStack()
+                    }
                 } else {
                     Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 }
@@ -71,19 +78,4 @@ fun UpdateNoteScreen(
             Text("Update")
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun UpdateNoteScreenPreview() {
-    val navController = rememberNavController()
-    val fakeNoteViewModel = NoteViewModel()
-
-    UpdateNoteScreen(
-        navController = navController,
-        noteId = "previewNoteId",
-        oldTitle = "Magnetic Fields",
-        oldContent = "This note explains how electromagnetic induction works...",
-        noteViewModel = fakeNoteViewModel
-    )
 }

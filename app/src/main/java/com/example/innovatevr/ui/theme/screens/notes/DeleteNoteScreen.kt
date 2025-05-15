@@ -1,12 +1,10 @@
-package com.example.innovatevr.ui.theme.screens
+package com.example.innovatevr.ui.theme.screens.notes
 
-import android.content.Context
+import android.widget.Toast
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.innovatevr.data.NoteViewModel
 
 @Composable
@@ -14,21 +12,23 @@ fun DeleteNoteScreen(
     noteId: String,
     navController: NavController,
     noteViewModel: NoteViewModel,
-    onDismiss: () -> Unit,
-    context: Context
+    onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        title = { Text("Delete Note") },
+        text = { Text("Are you sure you want to delete this note?") },
         confirmButton = {
             TextButton(onClick = {
                 noteViewModel.deleteNote(
-                    context, noteId,
-                    navController = TODO()
-                )
-                onDismiss()
-                navController.popBackStack()
+                    context = context,
+                    noteId = noteId
+                ) {
+                    Toast.makeText(context, "Note deleted", Toast.LENGTH_SHORT).show()
+                    onDismiss()
+                }
             }) {
                 Text("Yes")
             }
@@ -37,25 +37,6 @@ fun DeleteNoteScreen(
             TextButton(onClick = onDismiss) {
                 Text("No")
             }
-        },
-        title = { Text("Delete Note") },
-        text = { Text("Are you sure you want to delete this note?") }
+        }
     )
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun DeleteNoteScreenPreview() {
-    val navController = rememberNavController()
-    val noteViewModel = NoteViewModel()
-
-    MaterialTheme {
-        DeleteNoteScreen(
-            noteId = "sampleNoteId",
-            navController = navController,
-            noteViewModel = noteViewModel,
-            onDismiss = {},
-            context = LocalContext.current
-        )
-    }
 }

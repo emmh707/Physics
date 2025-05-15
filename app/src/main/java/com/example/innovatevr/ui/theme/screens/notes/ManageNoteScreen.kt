@@ -1,6 +1,7 @@
 package com.example.innovatevr.ui.theme.screens.notes
 
-import android.content.Context
+import com.example.innovatevr.ui.theme.screens.notes.DeleteNoteScreen
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,17 +23,19 @@ fun ManageNotesScreen(navController: NavController, noteViewModel: NoteViewModel
     val notes = remember { mutableStateListOf<NoteModel>() }
     val currentNote = remember { mutableStateOf(NoteModel()) }
 
-    // Load notes
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    val noteToDelete = remember { mutableStateOf<NoteModel?>(null) }
+
+    // Load notes from ViewModel
     LaunchedEffect(Unit) {
         noteViewModel.viewNotes(currentNote, notes, context)
     }
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp)) {
-
+        .padding(16.dp)
+    ) {
         Text("Saved Notes", style = MaterialTheme.typography.headlineMedium)
-
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn {
@@ -47,15 +50,21 @@ fun ManageNotesScreen(navController: NavController, noteViewModel: NoteViewModel
                         Text(text = note.title, style = MaterialTheme.typography.titleMedium)
                         Text(text = note.content, style = MaterialTheme.typography.bodyMedium)
 
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
                             TextButton(onClick = {
-                                // Navigate to UpdateNoteScreen
-                                navController.navigate("update_note/${note.noteId}/${note.title}/${note.content}")
+                                val encodedTitle = Uri.encode(note.title)
+                                val encodedContent = Uri.encode(note.content)
+                                navController.navigate("update_note/${note.noteId}/$encodedTitle/$encodedContent")
                             }) {
                                 Text("Edit")
                             }
+
                             TextButton(onClick = {
-                                navController.popBackStack()
+                                noteToDelete.value = note
+                                showDeleteDialog.value = true
                             }) {
                                 Text("Delete")
                             }
@@ -64,39 +73,44 @@ fun ManageNotesScreen(navController: NavController, noteViewModel: NoteViewModel
                 }
             }
         }
+
+        // Show delete dialog
+        noteToDelete.value?.let { note ->
+            if (showDeleteDialog.value) {
+                DeleteNoteScreen(
+                    noteId = note.noteId,
+                    navController = navController,
+                    noteViewModel = noteViewModel,
+                    onDismiss = {
+                        showDeleteDialog.value = false
+                        noteToDelete.value = null
+                    }
+                )
+            }
+        }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 fun ManageNotesScreenPreview() {
     val navController = rememberNavController()
 
-    val mockViewModel = (object : NoteViewModel() {
+    val mockViewModel = object : NoteViewModel() {
         override fun viewNotes(
             note: MutableState<NoteModel>,
             notes: SnapshotStateList<NoteModel>,
-            context: Context
+            context: android.content.Context
         ) {
             notes.clear()
             notes.addAll(
                 listOf(
-                    NoteModel(
-                        noteId = "1",
-                        title = "Demo Note 1",
-                        content = "This is a test note."
-                    ),
-                    NoteModel(
-                        noteId = "2",
-                        title = "Demo Note 2",
-                        content = "Another example content."
-                    )
+                    NoteModel(noteId = "1", title = "Sample 1", content = "First note."),
+                    NoteModel(noteId = "2", title = "Sample 2", content = "Second note.")
                 )
             )
-            return
         }
-    }).apply {
-
-        ManageNotesScreen(navController = navController, noteViewModel = this)
     }
+
+    ManageNotesScreen(navController = navController, noteViewModel = mockViewModel)
 }

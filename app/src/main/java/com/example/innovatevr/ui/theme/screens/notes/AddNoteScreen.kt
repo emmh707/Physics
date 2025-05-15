@@ -15,7 +15,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.innovatevr.data.NoteViewModel
 
-
 @Composable
 fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
     var title by remember { mutableStateOf("") }
@@ -28,7 +27,11 @@ fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Add New Note", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+        Text(
+            text = "Add New Note",
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -55,8 +58,10 @@ fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
         Button(
             onClick = {
                 if (title.isNotBlank() && content.isNotBlank()) {
-                    noteViewModel.addNote(context, title, content, navController)
-                    navController.popBackStack()
+                    noteViewModel.addNote(context, title, content) {
+                        Toast.makeText(context, "Note saved", Toast.LENGTH_SHORT).show()
+                        navController.popBackStack()
+                    }
                 } else {
                     Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 }
@@ -67,6 +72,7 @@ fun AddNoteScreen(navController: NavController, noteViewModel: NoteViewModel) {
         }
     }
 }
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AddNoteScreenPreview() {

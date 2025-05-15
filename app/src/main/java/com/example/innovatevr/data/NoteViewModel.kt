@@ -1,13 +1,11 @@
 package com.example.innovatevr.data
 
-import android.app.AlertDialog
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.innovatevr.models.NoteModel
 import com.google.firebase.database.*
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +18,7 @@ open class NoteViewModel : ViewModel() {
         context: Context,
         title: String,
         content: String,
-        navController: NavController
+        onSuccess: () -> Unit = {}
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val noteId = database.push().key ?: return@launch
@@ -30,6 +28,7 @@ open class NoteViewModel : ViewModel() {
                 .addOnSuccessListener {
                     viewModelScope.launch(Dispatchers.Main) {
                         Toast.makeText(context, "Note saved successfully", Toast.LENGTH_SHORT).show()
+                        onSuccess()
                     }
                 }
                 .addOnFailureListener {
@@ -67,41 +66,38 @@ open class NoteViewModel : ViewModel() {
 
     fun updateNote(
         context: Context,
-        navController: NavController,
         title: String,
         content: String,
-        noteId: String
+        noteId: String,
+        onSuccess: () -> Unit = {}
     ) {
         val ref = database.child(noteId)
         val updatedNote = NoteModel(noteId = noteId, title = title, content = content)
 
         ref.setValue(updatedNote).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(context, "Note updated", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(
+                context,
+                if (task.isSuccessful) "Note updated" else "Update failed",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            if (task.isSuccessful) onSuccess()
         }
     }
 
     fun deleteNote(
-        context: Context,
         noteId: String,
-        navController: NavController
+        context: Context,
+        onSuccess: () -> Unit = {}
     ) {
-        AlertDialog.Builder(context)
-            .setTitle("Delete Note")
-            .setMessage("Are you sure you want to delete this note?")
-            .setPositiveButton("Yes") { _, _ ->
-                database.child(noteId).removeValue().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(context, "Note deleted", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Delete failed", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            .show()
+        database.child(noteId).removeValue().addOnCompleteListener { task ->
+            Toast.makeText(
+                context,
+                if (task.isSuccessful) "Note deleted" else "Delete failed",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            if (task.isSuccessful) onSuccess()
+        }
     }
 }
